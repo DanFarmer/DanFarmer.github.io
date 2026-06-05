@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Dan Farmer | Publications</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<header id="header">
+				<h1><a href="index.html">Dan Farmer</a></h1>
+				<nav class="links">
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li><a href="research.html">Research</a></li>
+					<li><a href="publications.html" class="active">Publications</a></li>
+						<li><a href="teaching.html">Teaching</a></li>
+						<li><a href="contact.html">Contact</a></li>
+					</ul>
+				</nav>
+				<nav class="main">
+					<ul>
+						<li class="search"><a class="fa-search" href="#search">Search</a><form id="search" method="get" action="#"><input type="text" name="query" placeholder="Search" /></form></li>
+						<li class="menu"><a class="fa-bars" href="#menu">Menu</a></li>
+					</ul>
+				</nav>
+			</header>
+
+			<section id="menu">
+				<section>
+					<form class="search" method="get" action="#"><input type="text" name="query" placeholder="Search" /></form>
+				</section>
+				<section>
+					<ul class="links">
+						<li><a href="research.html"><h3>Research</h3><p>Projects and themes</p></a></li>
+						<li><a href="publications.html"><h3>Publications</h3><p>Selected papers</p></a></li>
+						<li><a href="teaching.html"><h3>Teaching</h3><p>Courses and mentoring</p></a></li>
+						<li><a href="contact.html"><h3>Contact</h3><p>Email and links</p></a></li>
+					</ul>
+				</section>
+			</section>
+
+			<div id="main">
+				<article class="post">
+					<header>
+						<div class="title">
+							<h2>Publications</h2>
+						</div>
+					</header>
+                    <p><strong>TODO:</strong> Add a short paragraph describing your main research direction, methods, and impact.</p>
+				</article>
+
+				<article class="post">
+					<header>
+						<div class="title">
+							<h2>Selected papers</h2>
+						</div>
+					</header>
+					<ol id="publication-list">
+					</ol>
+				</article>
+
+				<!-- <article class="post">
+					<header>
+						<div class="title">
+							<h2>Preprints and working papers</h2>
+							<p>Optional section for in-progress work</p>
+						</div>
+					</header>
+					<ul>
+						<li><strong>TODO:</strong> Preprint title — link</li>
+						<li><strong>TODO:</strong> Working paper title — link</li>
+					</ul>
+				</article> -->
+			</div>
+
+		</div>
+
+			<section id="footer">
+				<ul class="icons">
+					<li><a href="mailto:d.farmer@bangor.ac.uk" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+					<li><a href="https://scholar.google.com/" class="icon solid fa-graduation-cap"><span class="label">Google Scholar</span></a></li>
+					<li><a href="https://github.com/DanFarmer" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+					<li><a href="#" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+				</ul>
+				<p class="copyright">&copy; Dan Farmer. Bangor University, School of Computer Science and Engineering,</p>
+				<p class="copyright">&copy; This site is built with HTML5 UP</p>
+			</section>
+
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script>
+			(function () {
+				const list = document.getElementById('publication-list');
+				if (!list) return;
+
+				function normalizeText(value) {
+					return String(value || '').replace(/\s+/g, ' ').trim();
+				}
+
+				function formatAuthor(name) {
+					name = normalizeText(name);
+					if (!name) return '';
+
+					if (name.includes(',')) {
+						const parts = name.split(',');
+						const surname = normalizeText(parts[0]);
+						const given = normalizeText(parts.slice(1).join(','));
+						const initials = given
+							.split(/\s+/)
+							.filter(Boolean)
+							.map(part => part[0].toUpperCase() + '.')
+							.join(' ');
+						return initials ? `${initials} ${surname}` : surname;
+					}
+
+					const parts = name.split(/\s+/).filter(Boolean);
+					if (parts.length === 1) return parts[0];
+					const surname = parts.pop();
+					const initials = parts.map(part => part[0].toUpperCase() + '.').join(' ');
+					return `${initials} ${surname}`;
+				}
+
+				function formatAuthors(authorField) {
+					const authors = normalizeText(authorField)
+						.split(/\s+and\s+/i)
+						.map(formatAuthor)
+						.filter(Boolean);
+
+					if (!authors.length) return '';
+					if (authors.length === 1) return authors[0];
+					if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
+					return `${authors.slice(0, -1).join(', ')}, and ${authors[authors.length - 1]}`;
+				}
+
+				function parseFields(body) {
+					const fields = {};
+					const regex = /(\w+)\s*=\s*(\{(?:[^{}]|\{[^{}]*\})*\}|"(?:[^"\\]|\\.)*"|[^,\n]+)\s*,?/g;
+					let match;
+
+					while ((match = regex.exec(body)) !== null) {
+						let value = normalizeText(match[2]);
+						if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('"') && value.endsWith('"'))) {
+							value = value.slice(1, -1);
+						}
+						fields[match[1].toLowerCase()] = normalizeText(value);
+					}
+
+					return fields;
+				}
+
+				function parseBibtex(text) {
+					const entries = [];
+					let index = 0;
+
+					while (index < text.length) {
+						const at = text.indexOf('@', index);
+						if (at === -1) break;
+
+						const headerMatch = text.slice(at).match(/^@(\w+)\s*\{\s*([^,]+)\s*,/);
+						if (!headerMatch) {
+							index = at + 1;
+							continue;
+						}
+
+						const header = headerMatch[0];
+						const type = headerMatch[1].toLowerCase();
+						const key = normalizeText(headerMatch[2]);
+						let bodyStart = at + header.length;
+						let depth = 1;
+						let cursor = bodyStart;
+
+						while (cursor < text.length && depth > 0) {
+							const char = text[cursor];
+							if (char === '{') depth += 1;
+							else if (char === '}') depth -= 1;
+							cursor += 1;
+						}
+
+						const body = text.slice(bodyStart, depth === 0 ? cursor - 1 : text.length);
+						entries.push({ type, key, fields: parseFields(body) });
+						index = depth === 0 ? cursor : text.length;
+					}
+
+					return entries;
+				}
+
+				function formatEntry(entry) {
+					const fields = entry.fields || {};
+					const authors = formatAuthors(fields.author);
+					const title = normalizeText(fields.title);
+					const venue = normalizeText(fields.journal || fields.booktitle || fields.publisher || fields.school || fields.institution);
+					const year = normalizeText(fields.year);
+					const volume = normalizeText(fields.volume);
+					const number = normalizeText(fields.number);
+					const pages = normalizeText(fields.pages);
+					const link = normalizeText(fields.url || fields.pdf || fields.doi);
+
+					const parts = [];
+					if (authors) parts.push(authors);
+					if (title) parts.push(`“${title}”`);
+					if (venue) parts.push(venue);
+					if (volume) parts.push(`vol. ${volume}`);
+					if (number) parts.push(`no. ${number}`);
+					if (pages) parts.push(`pp. ${pages}`);
+					if (year) parts.push(year);
+
+					let citation = parts.join(', ');
+					if (citation && !citation.endsWith('.')) citation += '.';
+
+					if (link) {
+						const href = fields.url ? fields.url : (fields.pdf ? fields.pdf : `https://doi.org/${fields.doi}`);
+						citation += ` <a href="${href}">Link</a>`;
+					}
+
+					return citation || 'No citation data found.';
+				}
+
+				fetch('bib.bib')
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(`Unable to load bib.bib (${response.status})`);
+						}
+						return response.text();
+					})
+					.then(text => {
+						const entries = parseBibtex(text);
+						if (!entries.length) {
+							list.innerHTML = '<li>No bibliography entries found in bib.bib.</li>';
+							return;
+						}
+
+						list.innerHTML = entries.map((entry, index) => `<li>[${index + 1}] ${formatEntry(entry)}</li>`).join('');
+					})
+					.catch(error => {
+						list.innerHTML = `<li>Could not load bib.bib: ${error.message}</li>`;
+					});
+			})();
+		</script>
+	</body>
+</html>
