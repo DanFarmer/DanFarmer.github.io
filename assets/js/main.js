@@ -1,5 +1,5 @@
 /*
-	Stellar by HTML5 UP
+	Future Imperfect by HTML5 UP
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
@@ -8,6 +8,8 @@
 
 	var	$window = $(window),
 		$body = $('body'),
+		$menu = $('#menu'),
+		$sidebar = $('#sidebar'),
 		$main = $('#main');
 
 	// Breakpoints.
@@ -16,8 +18,7 @@
 			large:    [ '981px',   '1280px' ],
 			medium:   [ '737px',   '980px'  ],
 			small:    [ '481px',   '736px'  ],
-			xsmall:   [ '361px',   '480px'  ],
-			xxsmall:  [ null,      '360px'  ]
+			xsmall:   [ null,      '480px'  ]
 		});
 
 	// Play initial animations on page load.
@@ -27,97 +28,68 @@
 			}, 100);
 		});
 
-	// Nav.
-		var $nav = $('#nav');
+	// Menu.
+		$menu
+			.appendTo($body)
+			.panel({
+				delay: 500,
+				hideOnClick: true,
+				hideOnSwipe: true,
+				resetScroll: true,
+				resetForms: true,
+				side: 'right',
+				target: $body,
+				visibleClass: 'is-menu-visible'
+			});
 
-		if ($nav.length > 0) {
+	// Search (header).
+		var $search = $('#search'),
+			$search_input = $search.find('input');
 
-			// Shrink effect.
-				$main
-					.scrollex({
-						mode: 'top',
-						enter: function() {
-							$nav.addClass('alt');
-						},
-						leave: function() {
-							$nav.removeClass('alt');
-						},
-					});
+		$body
+			.on('click', '[href="#search"]', function(event) {
 
-			// Links.
-				var $nav_a = $nav.find('a');
+				event.preventDefault();
 
-				$nav_a
-					.scrolly({
-						speed: 1000,
-						offset: function() { return $nav.height(); }
-					})
-					.on('click', function() {
+				// Not visible?
+					if (!$search.hasClass('visible')) {
 
-						var $this = $(this);
+						// Reset form.
+							$search[0].reset();
 
-						// External link? Bail.
-							if ($this.attr('href').charAt(0) != '#')
-								return;
+						// Show.
+							$search.addClass('visible');
 
-						// Deactivate all links.
-							$nav_a
-								.removeClass('active')
-								.removeClass('active-locked');
+						// Focus input.
+							$search_input.focus();
 
-						// Activate link *and* lock it (so Scrollex doesn't try to activate other links as we're scrolling to this one's section).
-							$this
-								.addClass('active')
-								.addClass('active-locked');
+					}
 
-					})
-					.each(function() {
+			});
 
-						var	$this = $(this),
-							id = $this.attr('href'),
-							$section = $(id);
+		$search_input
+			.on('keydown', function(event) {
 
-						// No section for this link? Bail.
-							if ($section.length < 1)
-								return;
+				if (event.keyCode == 27)
+					$search_input.blur();
 
-						// Scrollex.
-							$section.scrollex({
-								mode: 'middle',
-								initialize: function() {
+			})
+			.on('blur', function() {
+				window.setTimeout(function() {
+					$search.removeClass('visible');
+				}, 100);
+			});
 
-									// Deactivate section.
-										if (browser.canUse('transition'))
-											$section.addClass('inactive');
+	// Intro.
+		var $intro = $('#intro');
 
-								},
-								enter: function() {
+		// Move to main on <=large, back to sidebar on >large.
+			breakpoints.on('<=large', function() {
+				$intro.prependTo($main);
+			});
 
-									// Activate section.
-										$section.removeClass('inactive');
-
-									// No locked links? Deactivate all links and activate this section's one.
-										if ($nav_a.filter('.active-locked').length == 0) {
-
-											$nav_a.removeClass('active');
-											$this.addClass('active');
-
-										}
-
-									// Otherwise, if this section's link is the one that's locked, unlock it.
-										else if ($this.hasClass('active-locked'))
-											$this.removeClass('active-locked');
-
-								}
-							});
-
-					});
-
-		}
-
-	// Scrolly.
-		$('.scrolly').scrolly({
-			speed: 1000
-		});
+			breakpoints.on('>large', function() {
+				$intro.prependTo($sidebar);
+			});
 
 })(jQuery);
