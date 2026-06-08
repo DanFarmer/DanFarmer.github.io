@@ -1,0 +1,13 @@
+# Node.js dev tooling (Puppeteer for local CV generation)
+node_modules/
+
+# Generated PDF artifacts
+*.pdf
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
