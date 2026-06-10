@@ -3632,3 +3632,17 @@ input, select, textarea {
 			}
 
 		}
+
+/* Burger menu button — only visible when nav links are hidden */
+
+	#header .main .menu {
+		display: none;
+	}
+
+	@media screen and (max-width: 980px) {
+
+		#header .main .menu {
+			display: inline-block;
+		}
+
+	}
